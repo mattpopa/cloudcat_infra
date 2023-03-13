@@ -49,4 +49,14 @@ resource "aws_route53_record" "cloudcat_mx" {
   ]
 }
 
+## add CNAME for mattpopa.gihub.io
+resource "aws_route53_record" "cloudcat_mattpopa" {
+  zone_id = aws_route53_zone.cloudcat.zone_id
+  name    = "blog.cloudcat.digital"
+  type    = "CNAME"
+  ttl     = "86400"
+  records = [
+    "mattpopa.github.io.",
+  ]
+}
 

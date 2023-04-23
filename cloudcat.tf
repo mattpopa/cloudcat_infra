@@ -60,3 +60,34 @@ resource "aws_route53_record" "cloudcat_mattpopa" {
   ]
 }
 
+## add SPF for google mail
+resource "aws_route53_record" "cloudcat_spf" {
+  zone_id = aws_route53_zone.cloudcat.zone_id
+  name    = "cloudcat.digital"
+  type    = "TXT"
+  ttl     = "86400"
+  records = [
+    "v=spf1 include:_spf.google.com ~all",
+  ]
+}
+
+## add DKIM for google mail
+resource "aws_route53_record" "cloudcat_dkim" {
+  zone_id = aws_route53_zone.cloudcat.zone_id
+  name    = "cloudcat._domainkey"
+  type    = "TXT"
+  ttl     = "86400"
+  records = [
+    "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhRRs49DQsnMDKFrBPPjAFu2NRjF5D/t5UgDI2Z8ge590VcVLPqTIy790KZef2TfpBkuRwx3wsm1SXXr3a0XKLs7lZSwuyYa/tWRl4zOPKcoHRX38nov2k+xEWpHtXiw5FqrFgihM0z2qX0fu1OigqMSHB3r3KVlhPYe0gKcamu6274yr+golnS22\"\"PrFMqCN3ux0dTC1Vr7xwEhmVXmQSue1yQnjsnJRvfNal+iZSAnWQkJVmmVakGPG/UHevVpLw0OyT+O4VSDMhz9hm/sqkQ4sQfomdihFQpnDa9BB1f47acW+Niqlsl1L2K7Bbejg3sNQYbrEpetU6wnm8a7peowIDAQAB"  ]
+}
+
+## add DMARC for google mail
+resource "aws_route53_record" "cloudcat_dmarc" {
+  zone_id = aws_route53_zone.cloudcat.zone_id
+  name    = "_dmarc.cloudcat"
+  type    = "TXT"
+  ttl     = "86400"
+  records = [
+    "v=DMARC1; p=none; rua=mailto:matt@cloudcat.digital.com"
+    ]
+}

@@ -89,6 +89,6 @@ resource "aws_route53_record" "cloudcat_dmarc" {
   type    = "TXT"
   ttl     = "86400"
   records = [
-    "v=DMARC1; p=none; rua=mailto:matt@cloudcat.digital.com"
+    "v=DMARC1; p=none; rua=mailto:${var.cloudcat_contact}"
     ]
 }

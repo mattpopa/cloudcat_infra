@@ -34,18 +34,16 @@ resource "aws_route53_zone" "cloudcat" {
   name = "cloudcat.digital"
 }
 
-## add google mail MX records
+## add zoho mail MX records
 resource "aws_route53_record" "cloudcat_mx" {
   zone_id = aws_route53_zone.cloudcat.zone_id
   name    = "cloudcat.digital"
   type    = "MX"
   ttl     = "86400"
   records = [
-    "1 aspmx.l.google.com",
-    "5 alt1.aspmx.l.google.com",
-    "5 alt2.aspmx.l.google.com",
-    "10 alt3.aspmx.l.google.com",
-    "10 alt4.aspmx.l.google.com",
+    "10 mx.zoho.eu",
+    "20 mx2.zoho.eu",
+    "50 mx3.zoho.eu"
   ]
 }
 
@@ -60,25 +58,26 @@ resource "aws_route53_record" "cloudcat_mattpopa" {
   ]
 }
 
-## add SPF for google mail
+## validations and SPF checks
 resource "aws_route53_record" "cloudcat_spf" {
   zone_id = aws_route53_zone.cloudcat.zone_id
   name    = "cloudcat.digital"
   type    = "TXT"
   ttl     = "86400"
   records = [
-    "v=spf1 include:_spf.google.com ~all",
+    "v=spf1 include:_spf.google.com include:zoho.eu ~all",
+    "zoho-verification=zb27550133.zmverify.zoho.eu"
   ]
 }
 
 ## add DKIM for google mail
 resource "aws_route53_record" "cloudcat_dkim" {
   zone_id = aws_route53_zone.cloudcat.zone_id
-  name    = "cloudcat._domainkey"
+  name    = "zmail._domainkey"
   type    = "TXT"
   ttl     = "86400"
   records = [
-    "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhRRs49DQsnMDKFrBPPjAFu2NRjF5D/t5UgDI2Z8ge590VcVLPqTIy790KZef2TfpBkuRwx3wsm1SXXr3a0XKLs7lZSwuyYa/tWRl4zOPKcoHRX38nov2k+xEWpHtXiw5FqrFgihM0z2qX0fu1OigqMSHB3r3KVlhPYe0gKcamu6274yr+golnS22\"\"PrFMqCN3ux0dTC1Vr7xwEhmVXmQSue1yQnjsnJRvfNal+iZSAnWQkJVmmVakGPG/UHevVpLw0OyT+O4VSDMhz9hm/sqkQ4sQfomdihFQpnDa9BB1f47acW+Niqlsl1L2K7Bbejg3sNQYbrEpetU6wnm8a7peowIDAQAB"
+    "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCz+gemYlm/HfVY7sU1HhLkAFQsf/tviwKFvC/A0a8en/zPHE+smU3/G2RX0aUwm8x5IZjROoI5cZgAA2yhI1ZtLFRoEhmE+kVHINpnPepJVlVkuw\"\"JkI+xXRjvVKerzw/XLjzIhSwmvKFVuYCKWOpXdxiUoinC2KL073KUP+GbG+QIDAQAB"
   ]
 }
 

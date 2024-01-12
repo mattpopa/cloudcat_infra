@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.3.6"
+  required_version = "1.6.5"
 
   backend local {
     path = "terraform.tfstate"
@@ -15,4 +15,9 @@ terraform {
 
 provider "aws" {
   region = "eu-west-2"
+}
+
+provider "aws" {
+  alias  = "use1"
+  region = "us-east-1"
 }

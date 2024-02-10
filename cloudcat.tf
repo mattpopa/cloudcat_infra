@@ -57,7 +57,8 @@ resource "aws_route53_record" "cloudcat_spf" {
   ttl     = "86400"
   records = [
     "v=spf1 include:_spf.google.com include:zoho.eu ~all",
-    "zoho-verification=zb27550133.zmverify.zoho.eu"
+    "zoho-verification=zb27550133.zmverify.zoho.eu",
+    "google-site-verification=yeC1LX83Ee3XOViZOBbaSi2VgDPQC1nlY4MVZVXTNqI"
   ]
 }
 

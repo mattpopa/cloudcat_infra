@@ -6,9 +6,51 @@ exec > >(tee /var/log/user_data.log | logger -t user_data) 2>&1
 # Update the system
 sudo yum update -y
 
-# Install Nginx and PHP from Amazon Linux Extras
-sudo amazon-linux-extras enable nginx1 php8.0
-sudo yum install -y nginx php php-fpm php-mysqlnd curl unzip
+# Install Nginx, PHP, and MariaDB from Amazon Linux Extras
+sudo amazon-linux-extras enable nginx1 php8.0 mariadb10.5
+sudo yum install -y nginx php php-fpm php-mysqlnd mariadb-server curl unzip
+
+# Start and enable MariaDB service
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+
+# Generate a random root password
+DB_ROOT_PASSWORD=$(openssl rand -base64 16)
+echo "db tmp pass $DB_ROOT_PASSWORD"
+
+# Automate MariaDB secure installation
+mysql -u root <<EOF
+-- Set root password
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
+
+-- Remove anonymous users
+DELETE FROM mysql.user WHERE User='';
+
+-- Disallow root login remotely
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+
+-- Remove test database
+DROP DATABASE IF EXISTS test;
+
+-- Remove privileges on test database
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+
+-- Reload privilege tables
+FLUSH PRIVILEGES;
+EOF
+
+# Create WordPress database and user
+DB_NAME="dev"
+DB_USER="dev_user"
+DB_PASSWORD="dev_password"
+DB_HOST="localhost"
+
+mysql -u root -p"$DB_ROOT_PASSWORD" <<EOF
+CREATE DATABASE $DB_NAME;
+CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
+FLUSH PRIVILEGES;
+EOF
 
 # Configure Cache Directories
 sudo mkdir -p /var/cache/nginx/proxy /var/cache/nginx/fastcgi
@@ -51,6 +93,11 @@ server {
     root /var/www/html;
     index index.php index.html index.htm;
 
+    # Redirect HTTP to HTTPS
+    if ($http_x_forwarded_proto != "https") {
+        return 301 https://$host$request_uri;
+    }
+
     auth_basic "Restricted Area";
     auth_basic_user_file /etc/nginx/.htpasswd;
 
@@ -79,7 +126,7 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
 
-    location ~* \.(?:ico|css|js|gif|jpe?g|png|svg|woff2?|eot|ttf|otf|html)$ {
+    location ~* \.(?:ico|css|js|gif|jpeg|jpg|png|svg|woff2?|eot|ttf|otf|html|webp)$ {
         expires max;
         log_not_found off;
     }
@@ -91,7 +138,7 @@ server {
 EOF
 
 # Create Basic Auth Password
-sudo htpasswd -cb /etc/nginx/.htpasswd devUser devPurpose
+sudo htpasswd -cb /etc/nginx/.htpasswd devUser devScope
 
 # Start and enable services
 sudo systemctl restart nginx php-fpm
@@ -102,3 +149,43 @@ cd /var/www/html
 sudo curl -O https://wordpress.org/latest.tar.gz
 sudo tar -xzf latest.tar.gz --strip-components=1
 sudo chown -R nginx:nginx /var/www/html
+
+# Generate WordPress authentication salts
+WP_SALTS=$(curl -s https://api.wordpress.org/secret-key/1.1/salt/)
+
+# Create wp-config.php using the default WordPress sample configuration
+cat <<EOF > /var/www/html/wp-config.php
+<?php
+/** The base configuration for WordPress */
+
+// ** Database settings ** //
+define( 'DB_NAME', '$DB_NAME' );
+define( 'DB_USER', '$DB_USER' );
+define( 'DB_PASSWORD', '$DB_PASSWORD' );
+define( 'DB_HOST', '$DB_HOST' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+define( 'WP_HOME', 'https://dev4.cloudcat.digital' );
+define( 'WP_SITEURL', 'https://dev4.cloudcat.digital' );
+define('FORCE_SSL_ADMIN', true);
+if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+}
+
+/**#@+ Authentication unique keys and salts. */
+$WP_SALTS
+/**#@-*/
+
+\$table_prefix = 'dev_';
+
+define( 'WP_DEBUG', false );
+
+if ( ! defined( 'ABSPATH' ) ) {
+    define( 'ABSPATH', __DIR__ . '/' );
+}
+require_once ABSPATH . 'wp-settings.php';
+EOF
+
+sudo chown nginx:nginx /var/www/html/wp-config.php
+
+echo "User data script completed successfully."

@@ -8,7 +8,8 @@ sudo yum update -y
 
 # Install Nginx, PHP, and MariaDB from Amazon Linux Extras
 sudo amazon-linux-extras enable nginx1 php8.0 mariadb10.5
-sudo yum install -y nginx php php-fpm php-mysqlnd mariadb-server curl unzip
+sudo yum install -y nginx php php-fpm php-mysqlnd mariadb-server curl unzip \
+php-gd php-mbstring php-intl php-dom php-pecl-imagick
 
 # Start and enable MariaDB service
 sudo systemctl start mariadb

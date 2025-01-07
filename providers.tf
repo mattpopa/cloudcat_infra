@@ -1,14 +1,16 @@
 terraform {
   required_version = "1.6.5"
 
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "s3" {
+    bucket = "cloudcat-tf-state"
+    key    = "cloudcat-digital/hosting.tfstate"
+    region = "eu-central-1"
   }
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.46.0"
+      version = "5.70.0"
     }
   }
 }

@@ -6,6 +6,10 @@ resource "aws_route53_zone" "cloudcat" {
   name = local.base_domain
 }
 
+resource "aws_route53_zone" "host1" {
+  name = local.host1
+}
+
 ## ################################################################################################
 ## DNS records
 ## ################################################################################################
@@ -69,29 +73,29 @@ resource "aws_route53_record" "cloudcat_github_pages" {
 # Apex domain - A and AAAA records pointing to GitHub Pages
 resource "aws_route53_record" "cloudcat_apex" {
   allow_overwrite = true
-  zone_id = aws_route53_zone.cloudcat.zone_id
-  name    = local.base_domain
-  type    = "A"
-  ttl     = "86400"
-  records = local.github_pages_ipv4
+  zone_id         = aws_route53_zone.cloudcat.zone_id
+  name            = local.base_domain
+  type            = "A"
+  ttl             = "86400"
+  records         = local.github_pages_ipv4
 }
 
 resource "aws_route53_record" "cloudcat_apex_v6" {
   allow_overwrite = true
-  zone_id = aws_route53_zone.cloudcat.zone_id
-  name    = local.base_domain
-  type    = "AAAA"
-  ttl     = "86400"
-  records = local.github_pages_ipv6
+  zone_id         = aws_route53_zone.cloudcat.zone_id
+  name            = local.base_domain
+  type            = "AAAA"
+  ttl             = "86400"
+  records         = local.github_pages_ipv6
 }
 
 # Subdomain www - CNAME record pointing to GitHub Pages
 resource "aws_route53_record" "www_subdomain" {
   allow_overwrite = true
-  zone_id = aws_route53_zone.cloudcat.zone_id
-  name    = "www.${local.base_domain}"
-  type    = "CNAME"
-  ttl     = "86400"
+  zone_id         = aws_route53_zone.cloudcat.zone_id
+  name            = "www.${local.base_domain}"
+  type            = "CNAME"
+  ttl             = "86400"
   records = [
     local.gh_pages_domain
   ]
@@ -100,10 +104,10 @@ resource "aws_route53_record" "www_subdomain" {
 # Subdomain blog - CNAME record pointing to GitHub Pages
 resource "aws_route53_record" "blog_subdomain" {
   allow_overwrite = true
-  zone_id = aws_route53_zone.cloudcat.zone_id
-  name    = "blog.${local.base_domain}"
-  type    = "CNAME"
-  ttl     = "86400"
+  zone_id         = aws_route53_zone.cloudcat.zone_id
+  name            = "blog.${local.base_domain}"
+  type            = "CNAME"
+  ttl             = "86400"
   records = [
     local.gh_pages_domain
   ]
@@ -120,4 +124,34 @@ resource "aws_route53_record" "dev4_subdomain" {
     zone_id                = aws_lb.hosting_alb.zone_id
     evaluate_target_health = false
   }
+}
+
+## ################################################################################################
+## Host1 DNS records
+## ################################################################################################
+
+# Apex domain - A and AAAA records pointing to GitHub Pages
+resource "aws_route53_record" "host1_apex" {
+  allow_overwrite = true
+  zone_id         = aws_route53_zone.host1.zone_id
+  name            = local.host1
+  type            = "A"
+
+  alias {
+    name                   = aws_lb.hosting_alb.dns_name
+    zone_id                = aws_lb.hosting_alb.zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Subdomain www - CNAME record pointing to the same ALB
+resource "aws_route53_record" "host1_www_subdomain" {
+  allow_overwrite = true
+  zone_id         = aws_route53_zone.host1.zone_id
+  name            = "www.${local.host1}"
+  type            = "CNAME"
+  ttl             = "86400"
+  records = [
+    aws_lb.hosting_alb.dns_name
+  ]
 }

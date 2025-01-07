@@ -7,9 +7,13 @@ exec > >(tee /var/log/user_data.log | logger -t user_data) 2>&1
 sudo yum update -y
 
 # Install Nginx, PHP, and MariaDB from Amazon Linux Extras
-sudo amazon-linux-extras enable nginx1 php8.0 mariadb10.5
+sudo amazon-linux-extras enable nginx1 php8.2 mariadb10.5
 sudo yum install -y nginx php php-fpm php-mysqlnd mariadb-server curl unzip \
 php-gd php-mbstring php-intl php-dom php-pecl-imagick
+
+# Update PHP-FPM to use the nginx user and group
+sudo sed -i 's/^user = apache/user = nginx/' /etc/php-fpm.d/www.conf
+sudo sed -i 's/^group = apache/group = nginx/' /etc/php-fpm.d/www.conf
 
 # Start and enable MariaDB service
 sudo systemctl start mariadb
@@ -94,11 +98,6 @@ server {
     root /var/www/html;
     index index.php index.html index.htm;
 
-    # Redirect HTTP to HTTPS
-    if ($http_x_forwarded_proto != "https") {
-        return 301 https://$host$request_uri;
-    }
-
     auth_basic "Restricted Area";
     auth_basic_user_file /etc/nginx/.htpasswd;
 
@@ -122,6 +121,7 @@ server {
         add_header X-FastCGI-Cache $upstream_cache_status;
 
         include fastcgi_params;
+        fastcgi_param HTTPS $http_x_forwarded_proto;
         fastcgi_pass unix:/run/php-fpm/www.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -169,9 +169,9 @@ define( 'DB_COLLATE', '' );
 define( 'WP_HOME', 'https://dev4.cloudcat.digital' );
 define( 'WP_SITEURL', 'https://dev4.cloudcat.digital' );
 define('FORCE_SSL_ADMIN', true);
-if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-    $_SERVER['HTTPS'] = 'on';
-}
+
+if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+    \$_SERVER['HTTPS'] = 'on';
 
 /**#@+ Authentication unique keys and salts. */
 $WP_SALTS
@@ -187,6 +187,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once ABSPATH . 'wp-settings.php';
 EOF
 
+rm -f /var/www/html/wp-config-sample.php
 sudo chown nginx:nginx /var/www/html/wp-config.php
 
 echo "User data script completed successfully."

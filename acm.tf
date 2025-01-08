@@ -33,3 +33,21 @@ module "host1" {
     Name = local.host1
   }
 }
+
+module "host2" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "5.1.0"
+
+  domain_name = local.host2
+  zone_id     = aws_route53_zone.host2.zone_id
+
+  subject_alternative_names = [
+    "*.${local.host2}"
+  ]
+
+  validation_method = "DNS"
+
+  tags = {
+    Name = local.host2
+  }
+}

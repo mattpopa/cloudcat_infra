@@ -10,6 +10,10 @@ resource "aws_route53_zone" "host1" {
   name = local.host1
 }
 
+resource "aws_route53_zone" "host2" {
+  name = local.host2
+}
+
 ## ################################################################################################
 ## DNS records
 ## ################################################################################################
@@ -153,5 +157,60 @@ resource "aws_route53_record" "host1_www_subdomain" {
   ttl             = "86400"
   records = [
     aws_lb.hosting_alb.dns_name
+  ]
+}
+
+## ################################################################################################
+## Host2 DNS records
+## ################################################################################################
+
+# Apex domain - A and AAAA records pointing to GitHub Pages
+resource "aws_route53_record" "host2_apex" {
+  allow_overwrite = true
+  zone_id         = aws_route53_zone.host2.zone_id
+  name            = local.host2
+  type            = "A"
+
+  alias {
+    name                   = aws_lb.hosting_alb.dns_name
+    zone_id                = aws_lb.hosting_alb.zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Subdomain www - CNAME record pointing to the same ALB
+resource "aws_route53_record" "host2_www_subdomain" {
+  allow_overwrite = true
+  zone_id         = aws_route53_zone.host2.zone_id
+  name            = "www.${local.host2}"
+  type            = "CNAME"
+  ttl             = "86400"
+  records = [
+    aws_lb.hosting_alb.dns_name
+  ]
+}
+
+resource "aws_route53_record" "host2_txt" {
+  zone_id = aws_route53_zone.host2.zone_id
+  name    = aws_route53_zone.host2.name
+  type    = "TXT"
+  ttl     = 600
+  records = [
+    "v=spf1 include:_spf.google.com +a +mx ~all"
+  ]
+}
+
+resource "aws_route53_record" "host2_mx" {
+  zone_id = aws_route53_zone.host2.zone_id
+  name    = aws_route53_zone.host2.name
+  type    = "MX"
+  ttl     = 600
+  records = [
+    "1 aspmx.l.google.com.",
+    "5 alt1.aspmx.l.google.com.",
+    "5 alt2.aspmx.l.google.com.",
+    "10 alt3.aspmx.l.google.com.",
+    "10 alt4.aspmx.l.google.com.",
+    "15 y532ohrpz3kbiggktezvb6stk6d2bmwodtc35mm6lkk3xsbeetia.mx-verification.google.com.",
   ]
 }

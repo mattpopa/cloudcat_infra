@@ -16,11 +16,17 @@ resource "aws_instance" "host1" {
   tags = {
     Name = "host1"
   }
+
+  lifecycle {
+    ignore_changes = [
+      user_data
+    ]
+  }
 }
 
 resource "aws_instance" "host2" {
   ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = var.instance_type_micro
+  instance_type          = var.instance_type_small
   subnet_id              = module.dev_vpc.private_subnets[0]
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
@@ -35,6 +41,12 @@ resource "aws_instance" "host2" {
 
   tags = {
     Name = "host2"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      user_data
+    ]
   }
 }
 

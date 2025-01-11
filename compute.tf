@@ -19,6 +19,7 @@ resource "aws_instance" "host1" {
 
   lifecycle {
     ignore_changes = [
+      ami,
       user_data
     ]
   }
@@ -45,6 +46,7 @@ resource "aws_instance" "host2" {
 
   lifecycle {
     ignore_changes = [
+      ami,
       user_data
     ]
   }

@@ -25,7 +25,7 @@ locals {
 
 variable "cloudcat_contact" {
   description = "The email address of the CloudCat contact for this account"
-  default     = "billing@cloudcat.digital"
+  default     = "support@cloudcat.digital"
 }
 
 variable "instance_type_micro" {

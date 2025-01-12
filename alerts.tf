@@ -33,7 +33,7 @@ resource "aws_cloudwatch_metric_alarm" "billing_alert" {
 
 # SNS Topic in eu-central-1
 resource "aws_sns_topic" "health_alert_eu" {
-  name     = "health-alert-eu"
+  name = "health-alert-eu"
 }
 
 resource "aws_sns_topic_subscription" "health_alert_eu_subscription" {
@@ -44,17 +44,17 @@ resource "aws_sns_topic_subscription" "health_alert_eu_subscription" {
 
 # Health Alert for Host1
 resource "aws_cloudwatch_metric_alarm" "host1_status_check_failed" {
-  provider                = aws
-  alarm_name              = "Host1-StatusCheckFailed"
-  comparison_operator     = "GreaterThanThreshold"
-  evaluation_periods      = 1
-  metric_name             = "StatusCheckFailed"
-  namespace               = "AWS/EC2"
-  period                  = 60
-  statistic               = "Maximum"
-  threshold               = 1
-  alarm_description       = "Alarm if Host1 fails EC2 status checks"
-  alarm_actions           = [aws_sns_topic.health_alert_eu.arn]
+  provider            = aws
+  alarm_name          = "Host1-StatusCheckFailed"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "StatusCheckFailed"
+  namespace           = "AWS/EC2"
+  period              = 60
+  statistic           = "Maximum"
+  threshold           = 1
+  alarm_description   = "Alarm if Host1 fails EC2 status checks"
+  alarm_actions       = [aws_sns_topic.health_alert_eu.arn]
   dimensions = {
     InstanceId = aws_instance.host1.id
   }
@@ -62,17 +62,17 @@ resource "aws_cloudwatch_metric_alarm" "host1_status_check_failed" {
 
 # Health Alert for Host2
 resource "aws_cloudwatch_metric_alarm" "host2_status_check_failed" {
-  provider                = aws
-  alarm_name              = "Host2-StatusCheckFailed"
-  comparison_operator     = "GreaterThanThreshold"
-  evaluation_periods      = 1
-  metric_name             = "StatusCheckFailed"
-  namespace               = "AWS/EC2"
-  period                  = 60
-  statistic               = "Maximum"
-  threshold               = 1
-  alarm_description       = "Alarm if Host2 fails EC2 status checks"
-  alarm_actions           = [aws_sns_topic.health_alert_eu.arn]
+  provider            = aws
+  alarm_name          = "Host2-StatusCheckFailed"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "StatusCheckFailed"
+  namespace           = "AWS/EC2"
+  period              = 60
+  statistic           = "Maximum"
+  threshold           = 1
+  alarm_description   = "Alarm if Host2 fails EC2 status checks"
+  alarm_actions       = [aws_sns_topic.health_alert_eu.arn]
   dimensions = {
     InstanceId = aws_instance.host2.id
   }

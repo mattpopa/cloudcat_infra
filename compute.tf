@@ -1,8 +1,9 @@
 resource "aws_instance" "host1" {
-  ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = var.instance_type_micro
-  subnet_id              = module.dev_vpc.private_subnets[0]
-  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  ami                         = var.ami-bkp-1
+  instance_type               = var.instance_type_micro
+  subnet_id                   = module.dev_vpc.public_subnets[0]
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
   user_data            = file("scripts/user_data_host1.sh")
@@ -26,10 +27,11 @@ resource "aws_instance" "host1" {
 }
 
 resource "aws_instance" "host2" {
-  ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = var.instance_type_small
-  subnet_id              = module.dev_vpc.private_subnets[0]
-  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  ami                         = var.ami-bkp-2
+  instance_type               = var.instance_type_small
+  subnet_id                   = module.dev_vpc.public_subnets[0]
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
   user_data            = file("scripts/user_data_host2.sh")
@@ -57,10 +59,11 @@ resource "aws_security_group" "ec2_sg" {
   vpc_id = module.dev_vpc.vpc_id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "Allow traffic from ALB on port 80"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
   }
 
   egress {
@@ -68,6 +71,10 @@ resource "aws_security_group" "ec2_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "dev-ec2-sg"
   }
 }
 
@@ -96,23 +103,3 @@ resource "aws_iam_instance_profile" "ssm_instance_profile" {
   name = "ssm-instance-profile"
   role = aws_iam_role.ssm_role.name
 }
-
-#resource "aws_instance" "dev4" {
-#  ami                    = data.aws_ami.amazon_linux_2.id
-#  instance_type          = var.instance_type_micro
-#  subnet_id              = module.dev_vpc.private_subnets[0]
-#  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-#
-#  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
-#  user_data            = file("scripts/user_data_base.sh")
-#
-#  root_block_device {
-#    volume_size           = 20
-#    volume_type           = "gp3"
-#    delete_on_termination = true
-#  }
-#
-#  tags = {
-#    Name = "dev4"
-#  }
-#}

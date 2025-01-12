@@ -37,3 +37,13 @@ variable "instance_type_small" {
   description = "The instance type to use for the EC2 instance"
   default     = "t3.small"
 }
+
+variable "ami-bkp-1" {
+  description = "The AMI ID to use for the EC2 instance"
+  default     = "ami-0949bc79b8de80a54"
+}
+
+variable "ami-bkp-2" {
+  description = "The AMI ID to use for the EC2 instance"
+  default     = "ami-07ade1684131b31d3"
+}

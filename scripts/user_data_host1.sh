@@ -109,7 +109,17 @@ server {
         set $no_cache 1;
     }
 
+    client_max_body_size 10M;
+
+    location ^~ /wp-content/uploads/ {
+        add_header Access-Control-Allow-Origin *;
+        auth_basic off;  # Disable authentication for uploads
+    }
+
     location / {
+       allow 127.0.0.1;
+        allow 10.0.0.0/8;
+        deny all;
         try_files $uri $uri/ /index.php?$args;
 
         fastcgi_cache fastcgi_cache_zone;
@@ -119,6 +129,9 @@ server {
         fastcgi_cache_valid 200 60m;
         fastcgi_cache_valid 404 5m;
         add_header X-FastCGI-Cache $upstream_cache_status;
+
+        fastcgi_buffers 8 16k;
+        fastcgi_buffer_size 32k;
 
         include fastcgi_params;
         fastcgi_param HTTPS $http_x_forwarded_proto;

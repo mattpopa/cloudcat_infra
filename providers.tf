@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.6.5"
+  required_version = "1.10.4"
 
   backend "s3" {
     bucket = "cloudcat-tf-state"

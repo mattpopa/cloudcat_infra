@@ -2,7 +2,7 @@ resource "aws_instance" "host1" {
   ami                         = var.ami-bkp-1
   instance_type               = var.instance_type_micro
   subnet_id                   = module.dev_vpc.public_subnets[0]
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
@@ -28,9 +28,9 @@ resource "aws_instance" "host1" {
 
 resource "aws_instance" "host2" {
   ami                         = var.ami-bkp-2
-  instance_type               = var.instance_type_small
+  instance_type               = var.instance_type_micro
   subnet_id                   = module.dev_vpc.public_subnets[0]
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
@@ -59,7 +59,6 @@ resource "aws_security_group" "ec2_sg" {
   vpc_id = module.dev_vpc.vpc_id
 
   ingress {
-    description     = "Allow traffic from ALB on port 80"
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
@@ -71,6 +70,7 @@ resource "aws_security_group" "ec2_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks  = ["::/0"]
   }
 
   tags = {

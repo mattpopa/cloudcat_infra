@@ -19,13 +19,12 @@ resource "aws_cloudwatch_metric_alarm" "billing_alert" {
   evaluation_periods  = "1"
   metric_name         = "EstimatedCharges"
   namespace           = "AWS/Billing"
-  period              = "86400"
+  period              = "21600"
   statistic           = "Maximum"
   threshold           = "40"
   alarm_description   = "This metric monitors AWS Billing for cloudcat.digital"
   alarm_actions       = [aws_sns_topic.billing_alert_us.arn]
 }
-
 
 ## #############################################################################
 ## Health alerts

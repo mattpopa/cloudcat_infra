@@ -45,5 +45,5 @@ variable "ami-bkp-1" {
 
 variable "ami-bkp-2" {
   description = "The AMI ID to use for the EC2 instance"
-  default     = "ami-05673e6eca6d30e25"
+  default     = "ami-0856059115bd424b8"
 }

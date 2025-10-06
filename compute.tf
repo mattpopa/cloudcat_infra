@@ -2,7 +2,7 @@ resource "aws_instance" "host1" {
   ami                         = var.ami-bkp-1
   instance_type               = var.instance_type_micro
   subnet_id                   = module.dev_vpc.public_subnets[0]
-  associate_public_ip_address = false
+  associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name

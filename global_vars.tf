@@ -40,7 +40,7 @@ variable "instance_type_small" {
 
 variable "ami-bkp-1" {
   description = "The AMI ID to use for the EC2 instance"
-  default     = "ami-09f646db695454a2e"
+  default     = "ami-06b9b265a6f3b5031"
 }
 
 variable "ami-bkp-2" {

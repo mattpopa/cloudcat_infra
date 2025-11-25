@@ -152,7 +152,7 @@ server {
 EOF
 
 # Create Basic Auth Password
-sudo htpasswd -cb /etc/nginx/.htpasswd devUser devScope
+# sudo htpasswd -cb /etc/nginx/.htpasswd devUser devScope
 
 # Start and enable services
 sudo systemctl restart nginx php-fpm
